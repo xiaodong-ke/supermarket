@@ -22,6 +22,7 @@ axios.interceptors.request.use(config => {
   return config
 })
 
+
 Vue.prototype.$http = axios
 
 router.afterEach((to, from) => {

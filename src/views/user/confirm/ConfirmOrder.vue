@@ -40,8 +40,8 @@
         <div class="box-wrapper">
           <div class="box-shadow">
             <div>
-              <span class="pay-title">实付款: </span>
-              <span class="pay-price-symbol">¥ </span>
+              <span class="pay-title">实付款:</span>
+              <span class="pay-price-symbol">¥</span>
               <span class="pay-price">{{ totalMoney }}</span>
             </div>
             <div class="confirmAddr">
@@ -61,6 +61,8 @@
         <a href="javascript:;" @click="addUserOrder">提交订单</a>
       </div>
     </div>
+
+    <div v-html="html" style="width: 1024px; height: 800px;"></div>
   </div>
 </template>
 
@@ -75,10 +77,10 @@ export default {
   name: "confirmOrder",
   components: {
     ConfirmItem,
-    VDistpicker
+    VDistpicker,
   },
   created() {
-    this.$bus.$on("confirmOrder", goods => {
+    this.$bus.$on("confirmOrder", (goods) => {
       // console.log(goods);
       this.goodsList = goods;
       // console.log(this.goodsList);
@@ -88,14 +90,14 @@ export default {
   computed: {
     totalMoney() {
       let sum = 0;
-      this.goodsList.forEach(value => {
+      this.goodsList.forEach((value) => {
         sum += value.payMoney;
       });
       return sum;
     },
     userId() {
       return sessionStorage.getItem("userId");
-    }
+    },
   },
   data() {
     return {
@@ -106,11 +108,12 @@ export default {
         address: {
           province: "",
           city: "",
-          county: ""
+          county: "",
         },
-        detailAddress: ""
+        detailAddress: "",
       },
-      productList: []
+      productList: [],
+      html: "",
     };
   },
   methods: {
@@ -118,7 +121,7 @@ export default {
       this.$router.push("/cart/" + this.userId);
     },
     getUserAddress() {
-      getAddress(this.userId).then(res => {
+      getAddress(this.userId).then((res) => {
         // console.log(res);
         if (res.data.code == 200) {
           // console.log(res.data.data);
@@ -136,7 +139,7 @@ export default {
         this.formAddress.address.county,
         this.formAddress.detailAddress,
         this.userId
-      ).then(res => {
+      ).then((res) => {
         // console.log(res);
         if (res.data.code == 200) {
           this.addressDialog = false;
@@ -154,7 +157,7 @@ export default {
     addUserOrder() {
       // console.log(this.$refs.confirmItem);
       this.productList = [];
-      this.$refs.confirmItem.forEach(value => {
+      this.$refs.confirmItem.forEach((value) => {
         // console.log(value);
         let obj = {};
         obj.productId = value.item.productId;
@@ -165,28 +168,43 @@ export default {
       // console.log(this.productList);
       // console.log(JSON.stringify(this.productList));
       // console.log(this.totalMoney)
-      // addOrder('1272443982005145601', JSON.stringify(this.productList), this.totalMoney).then(res => {
+      // addOrder(
+      //   this.userId,
+      //   JSON.stringify(this.productList),
+      //   this.totalMoney
+      // ).then(res => {
       //   console.log(res);
       //   if (res.data.code == 200) {
-      //     this.$message.success("购买成功")
+      //     this.$message.success("购买成功");
+      //   } else {
+      //     this.$message.error(res.data.message);
       //   }
-      // })
+      // });
+
       let formdata = new FormData();
       formdata.append("userId", this.userId);
       formdata.append("productList", JSON.stringify(this.productList));
       formdata.append("totalMoney", this.totalMoney);
-      addOrder(formdata).then(res => {
-        // console.log(res);
-        if (res.data.code == 200) {
-          this.$message.success("购买成功");
-          this.$router.replace("/order");
-        } else {
-          this.$message.error(res.data.message);
-          // this.$router.push("/cart/" + this.userId);
-        }
+      addOrder(formdata).then((res) => {
+        // console.log(res.data);
+        // if (res.data.code == 200) {
+        //   this.$message.success("购买成功");
+        //   this.$router.replace("/order");
+        // } else {
+        //   this.$message.error(res.data.message);
+        //   // this.$router.push("/cart/" + this.userId);
+        // }
+
+        //沙箱测试：支付接口返回html片段
+        var form = res.data;
+        const div = document.createElement("div");
+        document.body.appendChild(div);
+        div.id = "alipay";
+        div.innerHTML = form;
+        document.forms[0].submit();
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
